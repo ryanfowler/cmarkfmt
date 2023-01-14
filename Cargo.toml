@@ -1,7 +1,13 @@
 [package]
 name = "cmarkfmt"
 version = "0.1.0"
+authors = ["Ryan Fowler"]
 edition = "2021"
+description = "A library for formatting CommonMark"
+repository = "https://github.com/ryanfowler/cmarkfmt"
+license = "MIT"
+keywords = ["markdown", "commonmark", "cmark", "format", "formatter"]
+categories = ["development-tools", "encoding", "parsing"]
 
 [dependencies]
 pulldown-cmark = { version = "0.9.2" }
