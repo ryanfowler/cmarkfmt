@@ -22,7 +22,30 @@ use pulldown_cmark::{
 /// Function for formatting code blocks within markdown.
 ///
 /// The first parameter is the language, and the second parameter is the code
-/// itself. If formatted, returns Some(String) with the code block to use.
+/// itself. If formatted, returns `Some(String)` with the code block to use.
+///
+/// Example:
+///
+/// ```
+/// let input = r#"
+/// \`\`\`json
+/// {
+///   "key": "value"
+/// }
+/// \`\`\`"#;
+///
+/// let cmfmt = cmarkfmt::Formatter::default()
+///     .with_code_formatter(Some(&|lang, code| {
+///         if lang == "json" {
+///             Some(code.to_string())
+///         } else {
+///             None
+///         }
+///     }));
+///
+/// let output = cmfmt.format_cmark(input);
+/// println!("{output}");
+/// ```
 pub type CodeFormatFn<'a> = &'a dyn Fn(&str, &str) -> Option<String>;
 
 /// A `Formatter` is needed to format markdown. It is created and customized as
