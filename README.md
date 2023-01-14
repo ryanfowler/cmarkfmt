@@ -6,7 +6,7 @@ A CommonMark formatter library for Rust.
 
 ## Usage
 
-```rust 
+```rust
 let input = r#"# This is markdown
 It *needs* to be formatted."#;
 
