@@ -2,6 +2,8 @@
 
 A CommonMark formatter library for Rust.
 
+[![](https://img.shields.io/crates/v/cmarkfmt.svg)](https://crates.io/crates/cmarkfmt)
+
 ## Usage
 
 ```rust 
