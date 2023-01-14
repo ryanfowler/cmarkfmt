@@ -1,20 +1,44 @@
+//! # cmarkfmt
+//!
+//! A library for formatting CommonMark files.
+//!
+//! ## Usage
+//!
+//! ```
+//! let input = r#"# This is markdown
+//! It *needs* to be formatted."#;
+//!
+//! let cmfmt = cmarkfmt::Formatter::default();
+//! let output = cmfmt.format_cmark(input);
+//! println!("{output}");
+//! ```
+
 use std::fmt::{self, Debug, Write};
 
 use pulldown_cmark::{
     Alignment, CodeBlockKind, Event, HeadingLevel, LinkType, Options as POptions, Parser, Tag,
 };
 
+/// Function for formatting code blocks within markdown.
+///
+/// The first parameter is the language, and the second parameter is the code
+/// itself. If formatted, returns Some(String) with the code block to use.
 pub type CodeFormatFn<'a> = &'a dyn Fn(&str, &str) -> Option<String>;
 
+/// A `Formatter` is needed to format markdown. It is created and customized as
+/// needed using the `with_*` methods.
+///
+/// Once created, the `format_cmark` or `format_cmark_writer` methods can be
+/// used.
 #[derive(Clone)]
-pub struct FormatBuilder<'a> {
+pub struct Formatter<'a> {
     code_fmt: Option<CodeFormatFn<'a>>,
     blockquote: &'a str,
     emphasis: &'a str,
     unordered_list: &'a str,
 }
 
-impl Default for FormatBuilder<'_> {
+impl Default for Formatter<'_> {
     fn default() -> Self {
         Self {
             code_fmt: None,
@@ -25,7 +49,7 @@ impl Default for FormatBuilder<'_> {
     }
 }
 
-impl Debug for FormatBuilder<'_> {
+impl Debug for Formatter<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("FormatBuilder")
             .field("code_fmt", &self.code_fmt.map(|_| ()))
@@ -36,13 +60,15 @@ impl Debug for FormatBuilder<'_> {
     }
 }
 
-impl<'a> FormatBuilder<'a> {
+impl<'a> Formatter<'a> {
+    /// Format markdown, returning the formatted result as a String.
     pub fn format_cmark(&self, input: &str) -> String {
         let mut out = String::with_capacity(input.len() + 128);
         self.format_cmark_writer(input, &mut out).unwrap();
         out
     }
 
+    /// Format markdown, writing the result to the provided Writer.
     pub fn format_cmark_writer<W: fmt::Write>(&self, input: &str, w: W) -> fmt::Result {
         let mut opts = POptions::all();
         opts.remove(POptions::ENABLE_SMART_PUNCTUATION);
@@ -63,20 +89,25 @@ impl<'a> FormatBuilder<'a> {
         ctx.format(parser)
     }
 
+    /// Sets the `Formatter`s code formatter function. By default, code blocks
+    /// are not formatted.
     pub fn with_code_formatter(self, code_fmt: Option<CodeFormatFn<'a>>) -> Self {
-        FormatBuilder { code_fmt, ..self }
+        Formatter { code_fmt, ..self }
     }
 
+    /// Sets the blockquote string. Default: ">".
     pub fn with_blockquote(self, blockquote: &'a str) -> Self {
-        FormatBuilder { blockquote, ..self }
+        Formatter { blockquote, ..self }
     }
 
+    /// Sets the emphasis string. Default: "_".
     pub fn with_emphasis(self, emphasis: &'a str) -> Self {
-        FormatBuilder { emphasis, ..self }
+        Formatter { emphasis, ..self }
     }
 
+    /// Sets the unordered list string. Default: "-".
     pub fn with_unordered_list(self, unordered_list: &'a str) -> Self {
-        FormatBuilder {
+        Formatter {
             unordered_list,
             ..self
         }
@@ -99,8 +130,8 @@ struct Options<'a> {
     unordered_list_str: &'a str,
 }
 
-impl<'a> From<&'a FormatBuilder<'a>> for Options<'a> {
-    fn from(v: &'a FormatBuilder<'a>) -> Self {
+impl<'a> From<&'a Formatter<'a>> for Options<'a> {
+    fn from(v: &'a Formatter<'a>) -> Self {
         Options {
             code_fmt: &v.code_fmt,
             blockquote_str: v.blockquote,
