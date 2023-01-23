@@ -196,9 +196,6 @@ impl<'a, W: fmt::Write> Context<'a, W> {
     fn format(&mut self, parser: Parser) -> fmt::Result {
         let mut is_last_html = false;
         for event in parser {
-            #[cfg(debug_assertions)]
-            println!("{event:?}");
-
             if is_last_html {
                 match event {
                     Event::Html(_) | Event::Text(_) | Event::SoftBreak | Event::End(_) => {}
